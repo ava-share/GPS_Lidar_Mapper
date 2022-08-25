@@ -1,4 +1,5 @@
-
+''' Author: Dr. Talebpour
+    Date: 8/25/2022 '''
 
 with open('reprocessed_test1.pcd') as f:
     
@@ -9,7 +10,7 @@ with open('reprocessed_test1.pcd') as f:
     tmp = []
     for line in Lines:
         counter += 1
-        if 11 < counter > 1920000:
+        if 11 < counter > 1920000: #start at 11 to skip header 
             counter = 0
             file_counter += 1
             filename = 'reprocessed_sub_pcd' + str(file_counter) + '.pcd'
