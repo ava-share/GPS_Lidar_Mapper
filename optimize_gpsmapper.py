@@ -43,7 +43,7 @@ class GPSMapper():
         self.header.frame_id = 'map'
 
         odom_sub = message_filters.Subscriber('/novatel/oem7/odom', Odometry) # change to desired odometry topic name
-        lidar_sub = message_filters.Subscriber('/segmenter/points_ground', PointCloud2) #change to desired pointcloud topic name /filtered_points
+        lidar_sub = message_filters.Subscriber('/filtered_points', PointCloud2) #change to desired pointcloud topic name /segmenter/points_ground
         ts = message_filters.ApproximateTimeSynchronizer([lidar_sub, odom_sub], 10,0.75) #queue = 100, allowed slop between timestamps = 0.05 
         ts.registerCallback(self.callback)
 
