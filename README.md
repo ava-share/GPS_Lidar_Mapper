@@ -11,7 +11,7 @@ This script takes in Pointcloud2 and Odometry messages and computes a .pcd map t
 6. The .pcd can now be used
 
 # TO DO 
-1. change code to automatically replace the "insert_num_points" with the number of points on exit 
+1. DONE - change code to automatically replace the "insert_num_points" with the number of points on exit
 2. Make this a ROS node and allow for parameters to be passed (so changing topic names etc. is easier)
 3. name pcds based on timestamp rather than always name it test1.pcd
 
