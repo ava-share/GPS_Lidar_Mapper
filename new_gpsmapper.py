@@ -20,9 +20,9 @@ import std_msgs.msg
 import message_filters
 import math
 
-lim_x=[3, 50]
+lim_x=[3, 80]
 lim_y=[-15,15]
-lim_z=[-5,5]
+lim_z=[-10,5]
 
 class GPSMapper():
 
@@ -83,7 +83,7 @@ class GPSMapper():
 		#self.transformed_pc = []
 		odom_sub = message_filters.Subscriber('/novatel/oem7/odom', Odometry) # change to desired odometry topic name
 		lidar_sub = message_filters.Subscriber('/lidar_tc/velodyne_points', PointCloud2) #change to desired pointcloud topic name /filtered_points
-		ts = message_filters.ApproximateTimeSynchronizer([lidar_sub, odom_sub], 10,0.75) #queue = 100, allowed slop between timestamps = 0.05 
+		ts = message_filters.ApproximateTimeSynchronizer([lidar_sub, odom_sub], 10,0.5) #queue = 100, allowed slop between timestamps = 0.05 
 		ts.registerCallback(self.callback)
 
 		self.rate = rospy.Rate(60.0)
@@ -121,37 +121,31 @@ class GPSMapper():
             self.zr = msg_odom.pose.pose.orientation.z
             self.wr = msg_odom.pose.pose.orientation.w
 	  
-	    #get rotation matrix from quaternion
             self.rot = [self.xr, self.yr, self.zr, self.wr]
             self.rotation_matrix = quaternion_matrix(self.rot)
             self.rotation_matrix = np.delete(self.rotation_matrix, 3, axis=0)
             self.rotation_matrix1 = np.delete(self.rotation_matrix, 3, axis=1)
-            #pc = pc2.read_points(msg_lidar, skip_nans=True)
             pc = ros_numpy.numpify(msg_lidar)
             points=np.zeros((pc.shape[0],4))
             points[:,0]=pc['x']
             points[:,1]=pc['y']
             points[:,2]=pc['z']
             points[:,3]=1.0
+			
             rotated_pc = []
             p = self.crop_pointcloud(points)
             rotated_pc = self.rotation_matrix1.dot((np.vstack(([p[:,0]+1.529],[p[:,1]],[p[:,2]+1.311]))))
-            #rotated_pc = np.dot(self.rotation_matrix1,(np.vstack(([p[:,0]+1.529],[p[:,1]],[p[:,2]+1.311]))))
             newlines = []
             self.transformed_pc = (np.array([rotated_pc[0] + self.x,rotated_pc[1] +self.y,rotated_pc[2] +self.z])) #transform to global position
-            #print(self.transformed_pc)
-            self.pc_list.extend(np.vstack([self.transformed_pc[0], self.transformed_pc[1], self.transformed_pc[2], p[:,3]]).T)#self.pc_list.append([self.transformed_pc[0,:], self.transformed_pc[1,:], self.transformed_pc[2,:], p[:,3]])
-            #print(self.pc_list)
-            #self.test = ' '.join((self.test,str(self.transformed_pc[:][0].T), str(self.transformed_pc[:][1].T), str(self.transformed_pc[:][2].T), str(p[:,3].T), '\n'))
-            #self.test = ' '.join((self.test,str(self.transformed_pc[:].T),str(p[:,3]), '\n'))
-            #self.test =  ''.join((self.test,(str((np.vstack([self.transformed_pc[0], self.transformed_pc[1], self.transformed_pc[2], p[:,3], newlines]).T)))))
-            #newlines = ['\n'] * self.transformed_pc.shape[1]
+
+            self.pc_list.extend(np.vstack([self.transformed_pc[0], self.transformed_pc[1], self.transformed_pc[2], p[:,3]]).T)
+
             my_array = (np.array([self.transformed_pc[0], self.transformed_pc[1], self.transformed_pc[2], p[:,3]]).T)
-            #self.test_arr =  [format(num, '.10f') for num in my_array[:]]# [str.format(('{:.10f}', num) for num in my_array)]#
-            #self.test_arr  = ''.join(((str((np.array([self.transformed_pc[0], self.transformed_pc[1], self.transformed_pc[2], p[:,3]]).T.flatten())))))
-            self.test = "\n".join(" ".join(str(x) for x in row) for row in my_array)#''.join((str(self.test),str(self.test_arr)))
-            #print(self.test)#self.test = str(self.test.split())
-            self.points_counter += self.transformed_pc.shape[1]
+
+            self.test_arr = "\n".join(" ".join(str(x) for x in row) for row in my_array)
+            self.test = '\n'.join([self.test,self.test_arr])
+
+            self.points_counter += my_array.shape[0]
 
             output_rviz_pc = False
             if output_rviz_pc == True:
