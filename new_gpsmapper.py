@@ -31,7 +31,7 @@ class GPSMapper():
 		print("Shutting down and saving to .pcd file:")
 		rospy.sleep(2)
 		print("Saved")
-		
+		self.test = '\n'.join(self.test_arr)
 		num_points = self.points_counter
 		cloud = self.test
 		print("Saved " +str(num_points) + " to test1.pcd")
@@ -77,9 +77,13 @@ class GPSMapper():
 		self.yr = 0
 		self.zr = 0
 		self.wr = 0
+		self.i = 0
 		self.pc_list = []
 		self.header = std_msgs.msg.Header()
 		self.header.frame_id = 'map'
+
+		self.test_arr =[]
+
 		#self.transformed_pc = []
 		odom_sub = message_filters.Subscriber('/novatel/oem7/odom', Odometry) # change to desired odometry topic name
 		lidar_sub = message_filters.Subscriber('/lidar_tc/velodyne_points', PointCloud2) #change to desired pointcloud topic name /filtered_points
@@ -135,24 +139,15 @@ class GPSMapper():
             rotated_pc = []
             p = self.crop_pointcloud(points)
             rotated_pc = self.rotation_matrix1.dot((np.vstack(([p[:,0]+1.529],[p[:,1]],[p[:,2]+1.311]))))
-            newlines = []
             self.transformed_pc = (np.array([rotated_pc[0] + self.x,rotated_pc[1] +self.y,rotated_pc[2] +self.z])) #transform to global position
-
-            self.pc_list.extend(np.vstack([self.transformed_pc[0], self.transformed_pc[1], self.transformed_pc[2], p[:,3]]).T)
 
             my_array = (np.array([self.transformed_pc[0], self.transformed_pc[1], self.transformed_pc[2], p[:,3]]).T)
 
-            self.test_arr = "\n".join(" ".join(str(x) for x in row) for row in my_array)
-            self.test = '\n'.join([self.test,self.test_arr])
+            self.test_arr.append("\n".join(" ".join(str(x) for x in row) for row in my_array))
+            #print(self.test_arr[:][:].shape)
+			#self.test = '\n'.join([self.test,self.test_arr])
 
             self.points_counter += my_array.shape[0]
-
-            output_rviz_pc = False
-            if output_rviz_pc == True:
-                final = (np.asarray(self.pc_list)[:][:])
-                self.header.stamp = rospy.Time.now()
-                self.scaled_polygon_pcl = self.create_cloud_xyzi32(self.header, final)
-                self.pcl_pub.publish(self.scaled_polygon_pcl)
 
             end_time = rospy.Time.now().to_sec()
             print("Loop execution time: ", end_time-start_time)
