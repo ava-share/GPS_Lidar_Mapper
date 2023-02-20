@@ -134,7 +134,7 @@ class GPSMapper():
             points[:,0]=pc['x']
             points[:,1]=pc['y']
             points[:,2]=pc['z']
-            points[:,3]=1
+            points[:,3]=1 #optional save intensity of pointcloud use this line: points[:,3]=pc['intensity']
 			
             rotated_pc = []
             p = self.crop_pointcloud(points)
