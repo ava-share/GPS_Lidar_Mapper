@@ -17,7 +17,7 @@ lim_z=[-10,5] (10 meters below and up to 5 meters above the sensor)
 IF USING AN OUSTER LIDAR you need to add "pc = pc.ravel()" in line 133 (right after the rc = ros_numpify.numpify line)
 1. record data in a rosbag - topics needed are any odometry message and any pointcloud2 message
 2. replay rosbag (rosbag play --pause -r xx *bagname.bag*) - the lidar pointcloud should be published at 10 Hz, if the lidar is published at 20 Hz reduce the rate (xx) to 0.5 otherwise you can leave it at 1)
-3. change lim_x, lim_y, lim_z to desired values
+3. change lim_x, lim_y, lim_z to desired values along with the x_gps_lidar_offset, y_gps_lidar_offset, z_gps_lidar_offset 
 4. python new_gpsmapper.py
 5. unpause rosbag by hitting the spacebar in it's terminal
 6. Let it run until rosbag is finished or pause the rosbag, this will let the mapper catch up in case it was behind.
