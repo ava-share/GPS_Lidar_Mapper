@@ -15,6 +15,7 @@ lim_z=[-10,5] (10 meters below and up to 5 meters above the sensor)
 
 # How to use (updated)
 IF USING AN OUSTER LIDAR you need to add "pc = pc.ravel()" in line 133 (right after the rc = ros_numpify.numpify line)
+Additionally, if you want to change intensity of each point you can change line 137 to use the commented line
 1. record data in a rosbag - topics needed are any odometry message and any pointcloud2 message
 2. replay rosbag (rosbag play --pause -r xx *bagname.bag*) - the lidar pointcloud should be published at 10 Hz, if the lidar is published at 20 Hz reduce the rate (xx) to 0.5 otherwise you can leave it at 1)
 3. change lim_x, lim_y, lim_z to desired values along with the x_gps_lidar_offset, y_gps_lidar_offset, z_gps_lidar_offset 
