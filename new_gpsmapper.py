@@ -3,12 +3,9 @@
 Description: Simple GPS based Lidar Mapper
 Takes Lidar scan, filters out points that are too close or too high/low and transforms them based on GPS odometry (in UTM) 
 once the rosbag is done playing run the following the exit_hook will write the points to a .pcd file
-
 Notes: the callback functions takes around 0.25 seconds to execute, depending on the amount of points per scan it may be 0.18 to 0.5 seconds - taking out the for loop would speed this up but cannot filter out close points if we do - so the data needs to be slowed down a lot (or buffer needs to be huge) 
 '''
-
 import rospy
-#import tf
 from tf.transformations import  quaternion_matrix
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import PointCloud2
@@ -24,6 +21,9 @@ lim_x=[3, 80]
 lim_y=[-15,15]
 lim_z=[-10,5]
 
+x_gps_lidar_offset = 1.529 #Tamu Jeep, the Lidar is 1.529 meters in front of the GPS reported position
+y_gps_lidar_offset = 0
+z_gps_lidar_offset = 1.311
 class GPSMapper():
 
 	def exit_hook(self):
@@ -134,11 +134,11 @@ class GPSMapper():
             points[:,0]=pc['x']
             points[:,1]=pc['y']
             points[:,2]=pc['z']
-            points[:,3]=1.0
+            points[:,3]=1
 			
             rotated_pc = []
             p = self.crop_pointcloud(points)
-            rotated_pc = self.rotation_matrix1.dot((np.vstack(([p[:,0]+1.529],[p[:,1]],[p[:,2]+1.311]))))
+            rotated_pc = self.rotation_matrix1.dot((np.vstack(([p[:,0]+x_gps_lidar_offset],[p[:,1] + y_gps_lidar_offset],[p[:,2]+z_gps_lidar_offset]))))
             self.transformed_pc = (np.array([rotated_pc[0] + self.x,rotated_pc[1] +self.y,rotated_pc[2] +self.z])) #transform to global position
 
             my_array = (np.array([self.transformed_pc[0], self.transformed_pc[1], self.transformed_pc[2], p[:,3]]).T)
